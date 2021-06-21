@@ -7,7 +7,9 @@ package it.polito.tdp.imdb;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+import it.polito.tdp.imdb.model.Director;
 import it.polito.tdp.imdb.model.Model;
+import it.polito.tdp.imdb.model.Opponente;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -35,10 +37,10 @@ public class FXMLController {
     private Button btnCercaAffini; // Value injected by FXMLLoader
 
     @FXML // fx:id="boxAnno"
-    private ComboBox<?> boxAnno; // Value injected by FXMLLoader
+    private ComboBox<Integer> boxAnno; // Value injected by FXMLLoader
 
     @FXML // fx:id="boxRegista"
-    private ComboBox<?> boxRegista; // Value injected by FXMLLoader
+    private ComboBox<Director> boxRegista; // Value injected by FXMLLoader
 
     @FXML // fx:id="txtAttoriCondivisi"
     private TextField txtAttoriCondivisi; // Value injected by FXMLLoader
@@ -49,16 +51,65 @@ public class FXMLController {
     @FXML
     void doCreaGrafo(ActionEvent event) {
 
+    	txtResult.clear();
+    	this.boxRegista.getItems().clear();
+    	
+    	Integer anno = this.boxAnno.getValue();
+    	
+    	if(anno == null) {
+        	this.txtResult.appendText("ERRORE: non hai selezionato l'anno");
+        	return;
+    	}
+    	
+    	model.creaGrafo(anno);
+    	
+    	this.txtResult.appendText("GRAFO CREATO!!!\n\n");
+    	this.txtResult.appendText("#ARCHI: "+model.getNumArchi()+"\n");
+    	this.txtResult.appendText("#VERTICI: "+model.getNumVertici()+"\n");
+    	
+    	this.boxRegista.getItems().addAll(model.getVertici());
+    	
+    	
+
     }
 
     @FXML
     void doRegistiAdiacenti(ActionEvent event) {
 
+    	Director partenza = this.boxRegista.getValue();
+    	
+    	if(partenza == null) {
+        	this.txtResult.appendText("ERRORE: non hai selezionato il direttore");
+        	return;
+    	}
+    	String s = "";
+    	for(Opponente o : model.getAdiacenti(partenza)) {
+    		s+= o.toString()+"\n";
+    	}
+    	
+    	this.txtResult.appendText("\nREGISTI ADIACENTI\n"+s);
     }
 
     @FXML
     void doRicorsione(ActionEvent event) {
 
+    	String n = this.txtAttoriCondivisi.getText();
+    	Integer numeroMaxAttoriCondivisi;
+    	
+    	if(n == "") {
+    		this.txtResult.appendText("ERRORE: non hai inserito nessun numero");
+        	return;
+    	}
+    	
+    	try {
+    		numeroMaxAttoriCondivisi = Integer.parseInt(n);
+    	}
+    	catch(NumberFormatException e) {
+    		this.txtResult.appendText("ERRORE: formato non correto");
+        	return;
+    	}
+    	
+    	
     }
 
     @FXML // This method is called by the FXMLLoader when initialization is complete
@@ -76,6 +127,10 @@ public class FXMLController {
    public void setModel(Model model) {
     	
     	this.model = model;
+    	
+    	for(int i=2004; i<=2006; i++) {
+    		this.boxAnno.getItems().add(i);
+    	}
     	
     }
     
